@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('time_slots', function (Blueprint $table) {
+            $table->id();
+
+            $table->dateTime('starts_at');
+            $table->dateTime('ends_at');
+
+            // open = réservable, blocked = bloqué (vacances…), booked = réservé
+            $table->string('status')->default('open');
+
+            $table->string('blocked_reason')->nullable();
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamps();
+
+            $table->unique('starts_at', 'time_slots_starts_at_unique');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('time_slots');
+    }
+};

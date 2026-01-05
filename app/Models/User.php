@@ -45,4 +45,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function pack()
+{
+    return $this->belongsTo(\App\Models\Pack::class);
+}
+
+
+public function appointments()
+{
+    return $this->hasMany(\App\Models\Appointment::class);
+}
+
+public function packChangeRequests()
+{
+    return $this->hasMany(\App\Models\PackChangeRequest::class);
+}
+
+
 }
