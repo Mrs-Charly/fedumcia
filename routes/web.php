@@ -39,7 +39,6 @@ Route::get('/packs/{slug}', [PackController::class, 'show'])->name('packs.show')
 // Rendez-vous (public)
 Route::post('/rendezvous', [AppointmentController::class, 'store'])->name('appointments.store');
 Route::get('/rendezvous/merci', [AppointmentController::class, 'thanks'])->name('appointments.thanks');
-Route::get('/rendezvous/confirm/{token}', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
 
 // Avis (public)
 Route::post('/avis', [ReviewController::class, 'store'])->name('reviews.store');

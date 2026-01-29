@@ -101,7 +101,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-bold text-gray-900">Prendre rendez-vous</h2>
             <p class="mt-2 text-gray-600 max-w-3xl">
-                Laisse tes informations et propose une date. Nous confirmerons par email.
+                Laisse tes informations et choisis un créneau. La confirmation est immédiate.
             </p>
 
             <form method="POST" action="{{ route('appointments.store') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
