@@ -18,10 +18,16 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    'name',
+    'email',
+    'password',
+    'is_admin',
+    'pack_id',
+    'address_line1',
+    'address_postal_code',
+    'address_city',
+];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -43,24 +49,22 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
     public function pack()
-{
-    return $this->belongsTo(\App\Models\Pack::class);
-}
+    {
+        return $this->belongsTo(\App\Models\Pack::class);
+    }
 
+    public function appointments()
+    {
+        return $this->hasMany(\App\Models\Appointment::class);
+    }
 
-public function appointments()
-{
-    return $this->hasMany(\App\Models\Appointment::class);
-}
-
-public function packChangeRequests()
-{
-    return $this->hasMany(\App\Models\PackChangeRequest::class);
-}
-
-
+    public function packChangeRequests()
+    {
+        return $this->hasMany(\App\Models\PackChangeRequest::class);
+    }
 }

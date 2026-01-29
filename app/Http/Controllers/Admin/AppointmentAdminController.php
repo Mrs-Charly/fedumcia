@@ -3,20 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateAppointmentRequest;
 use App\Models\Appointment;
+use App\Models\Pack;
 use Illuminate\Http\Request;
 
 class AppointmentAdminController extends Controller
 {
     public function index(Request $request)
     {
+        $status = $request->query('status');
+        $q = $request->query('q');
+
         $query = Appointment::query()->orderByDesc('scheduled_at');
 
-        if ($status = $request->query('status')) {
+        if ($status) {
             $query->where('status', $status);
         }
 
-        if ($q = $request->query('q')) {
+        if ($q) {
             $query->where(function ($sub) use ($q) {
                 $sub->where('email', 'like', "%{$q}%")
                     ->orWhere('company_name', 'like', "%{$q}%")
@@ -32,9 +37,27 @@ class AppointmentAdminController extends Controller
 
     public function show(Appointment $appointment)
     {
-        $appointment->load('user');
+        $appointment->load(['user', 'desiredPack']);
 
         return view('admin.appointments.show', compact('appointment'));
+    }
+
+    public function edit(Appointment $appointment)
+    {
+        $packs = Pack::orderBy('sort_order')->get();
+
+        return view('admin.appointments.edit', compact('appointment', 'packs'));
+    }
+
+    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
+    {
+        $data = $request->validated();
+
+        $appointment->update($data);
+
+        return redirect()
+            ->route('admin.appointments.show', $appointment)
+            ->with('status', 'Rendez-vous mis à jour.');
     }
 
     public function cancel(Request $request, Appointment $appointment)
@@ -43,6 +66,8 @@ class AppointmentAdminController extends Controller
             'status' => 'cancelled',
         ]);
 
-        return redirect()->route('admin.appointments.show', $appointment)->with('status', 'Rendez-vous annulé.');
+        return redirect()
+            ->route('admin.appointments.show', $appointment)
+            ->with('status', 'Rendez-vous annulé.');
     }
 }

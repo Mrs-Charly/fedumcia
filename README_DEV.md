@@ -1,147 +1,344 @@
 # Fedumcia — README DEV (handoff IA)
 
 ## 1) Contexte projet
-**Fedumcia** est une agence locale (Vesoul / Haute-Saône 70) spécialisée en :
-- **Attractivité visuelle** (photos/vidéos, contenus réseaux sociaux)
-- **Confiance client** (gestion e-réputation : avis Google/Facebook, réponse aux avis, stratégie collecte)
 
-Objectifs du site :
+**Fedumcia** est une agence locale (Vesoul / Haute-Saône 70) spécialisée en :
+
+- **Attractivité visuelle** (photos / vidéos, contenus réseaux sociaux)
+- **Confiance client** (gestion e-réputation : avis Google / Facebook, réponses aux avis, stratégie de collecte)
+
+### Objectifs du site
+
 - Présenter l’offre et les packs
 - Générer des prises de rendez-vous
 - Permettre la création de comptes clients
 - Gestion admin : RDV + demandes de pack (workflow de validation)
 
-Stack :
-- **Laravel 12.x**, PHP 8.3
+### Stack technique
+
+- **Laravel 12.x** — PHP 8.3
 - **MySQL**
 - Front : Blade + Tailwind (Breeze) / composants Laravel
-- Dev local : Laragon
+- Environnement local : Laragon
 
 ---
 
 ## 2) Fonctionnalités implémentées (état actuel)
 
 ### Public
+
 - Page **Home** (hero, concept, packs, formulaire RDV, avis, partenaires)
 - Page **Packs** (liste + détail)
 - Page **À propos** (présentation / portfolio) — contenu basique (à enrichir)
 
 ### Auth / Comptes
+
 - Auth Breeze : inscription / connexion / reset password
 - Création d’un compte possible **sans RDV**
 - Lors de la **confirmation RDV par email** :
-  - si l’utilisateur n’existe pas : création user + email vérifié
-  - envoi automatique d’un lien “définir son mot de passe” (reset link)
+  - si l’utilisateur n’existe pas : création du user + email vérifié
+  - envoi automatique d’un lien pour définir le mot de passe
 
 ### RDV (sans créneaux)
+
 - Formulaire RDV sur la home :
-  - `first_name`, `last_name`, `email`, `phone`, `company_name`, `scheduled_at`, `desired_pack_id`, `consent`
-- Anti-double réservation : **un RDV par datetime** (contrôle applicatif)
+  - `first_name`, `last_name`, `email`, `phone`, `company_name`
+  - `scheduled_at`, `desired_pack_id`, `consent`
+- Anti-double réservation : **un RDV par datetime**
 - Confirmation par email via token :
   - status `pending` → `confirmed`
   - association à un user
 
 ### Packs (workflow sécurisé)
-- Un user ne “change pas” directement son pack.
-- Il fait une **demande** (PackChangeRequest) : `pending`
-- L’admin approuve/refuse :
-  - **approve** : met à jour `users.pack_id` et marque la demande approuvée
-  - **reject** : marque la demande refusée
 
-✅ Ajout récent : si un pack souhaité est sélectionné au moment du RDV,
-une **PackChangeRequest pending est créée automatiquement** lors de la confirmation du RDV.
+- Un user ne change **jamais directement** son pack
+- Il crée une **demande de changement** (`PackChangeRequest`)
+- Statut initial : `pending`
+- Action admin :
+  - **approve** → met à jour `users.pack_id`
+  - **reject** → refuse la demande
+
+✅ Si un pack est sélectionné lors du RDV,  
+une `PackChangeRequest (pending)` est créée automatiquement à la confirmation.
 
 ### Admin
-Routes sous `/admin` protégées par middleware `admin` :
-- Dashboard admin (vue simple)
-- Liste RDV + détails + annulation (si implémentée)
-- Liste demandes de pack + approve/reject
+
+Routes sous `/admin` protégées par le middleware `admin` :
+
+- Dashboard admin
+- Liste des RDV + détails + annulation
+- Liste des demandes de pack (approve / reject)
 
 ### Navigation
-- Navbar adaptée :
-  - utilisateur : “Mon pack”, “Mon compte”
-  - admin : “Administration”
-- Certaines routes “profile” peuvent être absentes selon la config ; éviter de hardcoder sans vérifier `Route::has()`.
+
+- Navbar dynamique :
+  - utilisateur : **Mon pack**, **Mon compte**
+  - admin : **Administration**
+- Vérifier l’existence des routes avec `Route::has()`
 
 ---
 
-## 3) Modèles / Tables (résumé)
+## 3) Modèles / Tables
 
 ### users
-- `is_admin` bool
-- `pack_id` nullable FK packs
+
+- `is_admin` (bool)
+- `pack_id` (nullable, FK packs)
 
 ### packs
-- `name`, `slug`, `price_eur`, `tagline`, etc.
+
+- `name`, `slug`, `price_eur`, `tagline`
 - `is_active`, `sort_order`
 
 ### appointments
-- identité + contact + entreprise
-- `scheduled_at` datetime
-- `desired_pack_id` nullable FK packs
-- `status` : pending|confirmed|cancelled
-- `confirmation_token` (uuid)
-- RGPD : `consent`, `consent_at`, `consent_ip`, `consent_user_agent`
-- `user_id` nullable, `confirmed_at`
+
+- Identité + contact + entreprise
+- `scheduled_at` (datetime)
+- `desired_pack_id` (nullable)
+- `status` : `pending | confirmed | cancelled`
+- `confirmation_token` (UUID)
+- RGPD :
+  - `consent`
+  - `consent_at`
+  - `consent_ip`
+  - `consent_user_agent`
+- `user_id` (nullable)
+- `confirmed_at`
 
 ### pack_change_requests
+
 - `user_id`
-- `current_pack_id` nullable
+- `current_pack_id` (nullable)
 - `requested_pack_id`
-- `status` : pending|approved|rejected
-- `message` (motif)
-- `processed_by` (admin id) + `approved_at` / `rejected_at`
+- `status` : `pending | approved | rejected`
+- `message`
+- `processed_by`
+- `approved_at` / `rejected_at`
 
 ---
 
-## 4) Routes clés (résumé)
+## 4) Routes clés
 
-Public :
-- `GET /` → home
-- `GET /packs` → packs index
-- `GET /packs/{slug}` → pack detail
-- `GET /a-propos` → about
+### Public
 
-RDV :
-- `POST /rendezvous` → appointments.store
-- `GET /rendezvous/merci` → appointments.thanks
-- `GET /rendezvous/confirm/{token}` → appointments.confirm
+- `GET /`
+- `GET /packs`
+- `GET /packs/{slug}`
+- `GET /a-propos`
 
-User :
-- `GET /compte` → account.dashboard
-- `GET /mon-pack` → pack.edit
-- `POST /mon-pack` → pack.update (crée une demande, pas update direct)
+### RDV
 
-Admin :
-- `GET /admin` → admin.dashboard
-- `GET /admin/appointments` → admin appointments index
-- `GET /admin/appointments/{appointment}` → show
-- `POST /admin/appointments/{appointment}/cancel` → cancel
-- `GET /admin/pack-requests` → list
-- `POST /admin/pack-requests/{id}/approve` → approve
-- `POST /admin/pack-requests/{id}/reject` → reject
+- `POST /rendezvous`
+- `GET /rendezvous/merci`
+- `GET /rendezvous/confirm/{token}`
+
+### User
+
+- `GET /compte`
+- `GET /mon-pack`
+- `POST /mon-pack` (crée une demande)
+
+### Admin
+
+- `GET /admin`
+- `GET /admin/appointments`
+- `GET /admin/appointments/{appointment}`
+- `POST /admin/appointments/{appointment}/cancel`
+- `GET /admin/pack-requests`
+- `POST /admin/pack-requests/{id}/approve`
+- `POST /admin/pack-requests/{id}/reject`
 
 ---
 
 ## 5) Emails
-- Confirmation RDV (MAIL_MAILER=log en dev)
-- Reset link pour définir le mot de passe après confirmation RDV
-- ⚠️ Aucun email marketing sans consentement explicite (non implémenté)
+
+- Confirmation de RDV (MAIL_MAILER=log en dev)
+- Lien de création de mot de passe après confirmation RDV
+- Aucun email marketing sans consentement explicite
 
 ---
 
-## 6) RGPD / conformité (principes appliqués)
-- Case consentement obligatoire sur RDV (`consent` accepted)
-- Stockage d’un log minimal : date, IP, user-agent (troncation 512)
-- Finalité : gestion du RDV + création/gestion du compte
-- À prévoir : page Politique de confidentialité + mentions légales + gestion cookies (si analytics un jour)
+## 6) RGPD / conformité
+
+- Consentement obligatoire lors du RDV
+- Stockage minimal :
+  - date
+  - IP
+  - user-agent
+- Finalité :
+  - gestion du RDV
+  - gestion du compte
+- À prévoir :
+  - mentions légales
+  - politique de confidentialité
+  - gestion cookies (si analytics)
 
 ---
 
 ## 7) Commandes utiles
 
-Installer dépendances :
+### Installation
+
 ```bash
 composer install
 npm install
 npm run dev
+```
+
+### Configuration environnement
+
+```bash
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+```
+
+### Nettoyage cache
+
+```bash
+php artisan optimize:clear
+```
+
+### Lister les routes
+
+```bash
+php artisan route:list
+```
+
+---
+
+## 8) Données de test
+
+Seeders existants :
+
+- `AdminUserSeeder`
+- `PackSeeder`
+- `DatabaseSeeder`
+
+---
+
+## 9) TODO priorisé
+
+### P1 — UX / stabilité
+
+- Validation des créneaux RDV (futur uniquement, 00 / 30)
+- Limitation horaires (9h–18h, lundi–vendredi)
+- Affichage erreurs validation sous les champs
+
+### P1 — Admin
+
+- Vue agenda
+- Journalisation annulations
+
+### P2 — Contenus
+
+- Portfolio détaillé
+- CRUD avis / partenaires
+
+### P2 — Légal
+
+- Mentions légales
+- Politique de confidentialité
+- CGU / CGV si nécessaire
+
+### P3 — Sécurité
+
+- Rate limiting RDV
+- Honeypot
+- Logs / monitoring
+
+---
+
+## 10) Règles pour génération IA
+
+- Respecter Laravel 12 + Blade / Tailwind
+- Ne pas introduire de paiement en ligne
+- Conserver le workflow de demande de pack
+- Respecter le RGPD
+- Proposer des migrations si nécessaire
+- Grouper les routes `/admin`
+
+---
+
+### Améliorations optionnelles
+
+- Section **Accès admin** (email du compte seed)
+- Section **Arborescence du projet**
+
+---
+
+## 11) Arborescence (repères importants)
+
+> Cette section décrit uniquement les dossiers/fichiers clés du projet pour
+> permettre à une IA ou un développeur de comprendre rapidement l’organisation.
+
+### app/
+- **Http/Controllers/**
+  - `HomeController` → page d’accueil (home)
+  - `AboutController` → page à propos
+  - `AppointmentController` → prise de RDV + confirmation email
+  - `AccountController` → espace compte utilisateur
+  - `UserPackController` → consultation pack + demande de changement
+  - `Auth/AuthenticatedSessionController` → login + redirection admin/user
+  - `Admin/`
+    - `AppointmentAdminController` → gestion RDV côté admin
+    - `PackChangeRequestAdminController` → approve / reject demandes de pack
+
+- **Models/**
+  - `User` → utilisateurs (admin / client)
+  - `Pack` → offres commerciales
+  - `Appointment` → rendez-vous
+  - `PackChangeRequest` → workflow sécurisé de changement de pack
+
+- **Mail/**
+  - `AppointmentConfirmationMail` → email de confirmation RDV
+
+- **Http/Middleware/**
+  - `Admin` → protège les routes `/admin`
+
+---
+
+### resources/views/
+- **layouts/**
+  - `public.blade.php` → layout pages publiques
+  - `app.blade.php` → layout authentifié
+  - `navigation.blade.php` → navbar utilisateurs/admin
+- **partials/**
+  - `public-nav.blade.php` → navigation publique
+- **home.blade.php** → page d’accueil
+- **packs/**
+  - `index.blade.php` → liste packs
+  - `show.blade.php` → détail pack
+- **appointments/**
+  - `thanks.blade.php`
+  - `confirmed.blade.php`
+- **account/**
+  - `dashboard.blade.php`
+- **admin/**
+  - `dashboard.blade.php`
+  - `appointments.blade.php`
+  - `pack-requests.blade.php`
+- **auth/**
+  - vues Breeze (login, register, forgot-password…)
+
+---
+
+### routes/
+- `web.php` → routes publiques, user et admin (groupes protégés)
+
+---
+
+### database/
+- **migrations/**
+  - users, packs, appointments, pack_change_requests
+- **seeders/**
+  - `AdminUserSeeder`
+  - `PackSeeder`
+  - `DatabaseSeeder`
+
+---
+
+### config / divers
+- `.env` → **NE JAMAIS VERSIONNER**
+- `tailwind.config.js` → styles
+- `vite.config.js` → build front
