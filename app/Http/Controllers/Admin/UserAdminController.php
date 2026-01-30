@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Services\AuditLogger;
 
 class UserAdminController extends Controller
 {
@@ -149,6 +150,10 @@ class UserAdminController extends Controller
     ]);
 
     return back()->with('status', 'Pack utilisateur mis à jour (historique enregistré).');
+
+    AuditLogger::log('user.pack_changed', $user, [
+    'pack_id' => $user->pack_id,
+]);
 }
 
 

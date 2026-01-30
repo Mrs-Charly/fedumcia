@@ -78,6 +78,14 @@
                     <h4 class="font-semibold text-lg">Statistiques</h4>
                     <p class="mt-2 text-sm text-gray-600">Voir les statistiques clés de la plateforme.</p>
                 </a>
+                <a href="{{ route('admin.audit_logs.index') }}"
+   class="block bg-white border rounded-lg p-6 hover:shadow transition">
+    <h4 class="font-semibold text-lg">Historique (audit)</h4>
+    <p class="mt-2 text-sm text-gray-600">
+        Suivre les actions admin et publiques importantes.
+    </p>
+</a>
+
             </div>
         </div>
     </div>

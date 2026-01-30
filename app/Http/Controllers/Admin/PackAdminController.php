@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Services\AuditLogger;
 
 class PackAdminController extends Controller
 {
@@ -112,12 +113,16 @@ class PackAdminController extends Controller
         if ($usedByUsers || $hasPendingRequests) {
             return back()->with('status', 'Désactivation refusée : ce pack est utilisé (utilisateurs ou demandes en attente).');
         }
+        AuditLogger::log('pack.toggled', $pack, [
+    'is_active' => (bool) $pack->is_active,
+]);
     }
 
     $pack->update(['is_active' => !$pack->is_active]);
 
     return back()->with('status', 'Statut du pack mis à jour.');
 }
+
 
 
 }

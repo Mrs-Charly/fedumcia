@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\AboutStatAdminController;
 use App\Http\Controllers\Admin\SocialLinkAdminController;
 
 use App\Http\Controllers\Admin\StatsAdminController;
+use App\Http\Controllers\Admin\AuditLogAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -148,6 +149,8 @@ Route::delete('/social-links/{link}', [SocialLinkAdminController::class, 'destro
 // stats 
 Route::get('/stats', [StatsAdminController::class, 'index'])->name('stats.index');
 
+// audit logs
+Route::get('/audit-logs', [AuditLogAdminController::class, 'index'])->name('audit_logs.index');
     });
 
 require __DIR__ . '/auth.php';

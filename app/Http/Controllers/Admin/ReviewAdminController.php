@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use App\Services\AuditLogger;
 
 class ReviewAdminController extends Controller
 {
@@ -39,6 +40,10 @@ class ReviewAdminController extends Controller
         ]);
 
         return back()->with('status', 'Avis approuvé.');
+
+        AuditLogger::log('review.approved', $review, [
+    'rating' => $review->rating,
+]);
     }
 
     public function hide(Review $review)

@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\PackChangeRequest;
 use App\Models\User;
 use Illuminate\Support\Str;
+use App\Services\AuditLogger;
 
 class AppointmentController extends Controller
 {
@@ -68,6 +69,11 @@ class AppointmentController extends Controller
             'consent_user_agent' => substr((string) $request->userAgent(), 0, 512),
         ]);
 
+        AuditLogger::log('appointment.created', $appointment, [
+    'scheduled_at' => (string) $appointment->scheduled_at,
+    'company_name' => $appointment->company_name,
+]);
+
         // Si un pack est choisi : créer une demande de changement (pending)
         if (!empty($data['desired_pack_id'])) {
             $alreadyPending = PackChangeRequest::where('user_id', $user->id)
@@ -94,4 +100,5 @@ class AppointmentController extends Controller
     {
         return view('appointments.thanks');
     }
+
 }
