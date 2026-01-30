@@ -24,6 +24,8 @@ use App\Http\Controllers\Admin\PortfolioProjectAdminController;
 use App\Http\Controllers\Admin\AboutStatAdminController;
 use App\Http\Controllers\Admin\SocialLinkAdminController;
 
+use App\Http\Controllers\Admin\StatsAdminController;
+
 /*
 |--------------------------------------------------------------------------
 | Public
@@ -143,6 +145,8 @@ Route::get('/social-links', [SocialLinkAdminController::class, 'index'])->name('
 Route::post('/social-links', [SocialLinkAdminController::class, 'store'])->name('social_links.store');
 Route::put('/social-links/{link}', [SocialLinkAdminController::class, 'update'])->name('social_links.update');
 Route::delete('/social-links/{link}', [SocialLinkAdminController::class, 'destroy'])->name('social_links.destroy');
+// stats 
+Route::get('/stats', [StatsAdminController::class, 'index'])->name('stats.index');
 
     });
 

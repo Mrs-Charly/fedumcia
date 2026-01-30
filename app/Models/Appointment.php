@@ -41,5 +41,4 @@ public function desiredPack()
 {
     return $this->belongsTo(\App\Models\Pack::class, 'desired_pack_id');
 }
-
 }

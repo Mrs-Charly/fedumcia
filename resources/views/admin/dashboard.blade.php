@@ -73,6 +73,11 @@
                     <h4 class="font-semibold text-lg">Partenaires</h4>
                     <p class="mt-2 text-sm text-gray-600">Ajouter / modifier / désactiver les partenaires.</p>
                 </a>
+                <a href="{{ route('admin.stats.index') }}"
+                    class="block bg-white border rounded-lg p-6 hover:shadow transition">
+                    <h4 class="font-semibold text-lg">Statistiques</h4>
+                    <p class="mt-2 text-sm text-gray-600">Voir les statistiques clés de la plateforme.</p>
+                </a>
             </div>
         </div>
     </div>
